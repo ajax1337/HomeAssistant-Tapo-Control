@@ -53,6 +53,8 @@ from .const import (
     LOGGER,
     CLOUD_PASSWORD,
     ENABLE_TIME_SYNC,
+    UPDATE_INTERVAL_BATTERY,
+    UPDATE_INTERVAL_BATTERY_DEFAULT,
     CONF_CUSTOM_STREAM_HD,
     CONF_CUSTOM_STREAM_SD,
     CONF_CUSTOM_STREAM_6,
@@ -2231,14 +2233,26 @@ async def scheduleAll(hass, device, entry, mediaSync):
             and device["mediaSyncScheduled"] is False
         ):
             device["mediaSyncScheduled"] = True
-            LOGGER.debug("Scheduling media sync")
+            # Polling recordings every 60 seconds keeps battery powered
+            # cameras awake permanently and drains them within days.
+            # Follow the battery update interval for those instead.
+            mediaSyncInterval = 60
+            if device.get("isRunningOnBattery"):
+                mediaSyncInterval = max(
+                    entry.data.get(UPDATE_INTERVAL_BATTERY)
+                    or UPDATE_INTERVAL_BATTERY_DEFAULT,
+                    mediaSyncInterval,
+                )
+            LOGGER.debug(
+                "Scheduling media sync every " + str(mediaSyncInterval) + " seconds"
+            )
             callback = partial(mediaSync, entry=entry, device=device)
 
             entry.async_on_unload(
                 async_track_time_interval(
                     hass,
                     callback,
-                    datetime.timedelta(seconds=60),
+                    datetime.timedelta(seconds=mediaSyncInterval),
                 )
             )
         elif device["initialMediaScanRunning"] is False:

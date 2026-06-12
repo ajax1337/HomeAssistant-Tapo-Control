@@ -1035,13 +1035,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
             "name": camData["basic_info"]["device_alias"],
             "childDevices": [],
             "isRunningOnBattery": (
-                True
-                if (
-                    "basic_info" in camData
-                    and "power" in camData["basic_info"]
-                    and camData["basic_info"]["power"] == "BATTERY"
-                )
-                else False
+                "basic_info" in camData
+                and camData["basic_info"].get("power") in ("BATTERY", "SOLAR")
             ),
             "isChild": False,
             "uuid": hashlib.md5(
@@ -1142,14 +1137,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
                                 "childDevices": [],
                                 "isChild": True,
                                 "isRunningOnBattery": (
-                                    True
-                                    if (
-                                        "basic_info" in childCamData
-                                        and "power" in childCamData["basic_info"]
-                                        and childCamData["basic_info"]["power"]
-                                        == "BATTERY"
-                                    )
-                                    else False
+                                    "basic_info" in childCamData
+                                    and childCamData["basic_info"].get("power")
+                                    in ("BATTERY", "SOLAR")
                                 ),
                                 "isParent": False,
                             }
