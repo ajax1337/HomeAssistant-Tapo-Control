@@ -54,6 +54,7 @@ from .const import (
     CLOUD_PASSWORD,
     ENABLE_TIME_SYNC,
     MEDIA_SYNC_INITIAL_SCAN_MAX_ATTEMPTS,
+    MEDIA_SYNC_RUN_TIMEOUT,
     UPDATE_INTERVAL_BATTERY,
     UPDATE_INTERVAL_BATTERY_DEFAULT,
     CONF_CUSTOM_STREAM_HD,
@@ -2247,12 +2248,31 @@ async def scheduleAll(hass, device, entry, mediaSync):
             LOGGER.debug(
                 "Scheduling media sync every " + str(mediaSyncInterval) + " seconds"
             )
-            callback = partial(mediaSync, entry=entry, device=device)
+
+            # Battery cameras can fall asleep mid sync, leaving the run
+            # hung with runningMediaSync=True and blocking every future
+            # tick. Bound each run and reset the flag so sync recovers
+            # on the next cycle.
+            async def _guardedMediaSync(now, entry=entry, device=device):
+                try:
+                    async with asyncio.timeout(MEDIA_SYNC_RUN_TIMEOUT):
+                        await mediaSync(now, entry=entry, device=device)
+                except TimeoutError:
+                    LOGGER.warning(
+                        "Media sync run for "
+                        + device["name"]
+                        + " timed out after "
+                        + str(MEDIA_SYNC_RUN_TIMEOUT)
+                        + " seconds (camera may have gone to sleep)."
+                        + " Will retry on next cycle."
+                    )
+                finally:
+                    device["runningMediaSync"] = False
 
             entry.async_on_unload(
                 async_track_time_interval(
                     hass,
-                    callback,
+                    _guardedMediaSync,
                     datetime.timedelta(seconds=mediaSyncInterval),
                 )
             )
