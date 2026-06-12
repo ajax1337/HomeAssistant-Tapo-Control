@@ -53,6 +53,7 @@ from .const import (
     LOGGER,
     CLOUD_PASSWORD,
     ENABLE_TIME_SYNC,
+    MEDIA_SYNC_INITIAL_SCAN_MAX_ATTEMPTS,
     UPDATE_INTERVAL_BATTERY,
     UPDATE_INTERVAL_BATTERY_DEFAULT,
     CONF_CUSTOM_STREAM_HD,
@@ -2266,17 +2267,40 @@ async def scheduleAll(hass, device, entry, mediaSync):
                     findMedia(hass, device, entry),
                     "findMedia",
                 )
+                device["initialMediaScanAttempts"] = 0
             except Exception as err:
-                device["initialMediaScanDone"] = True
-                device["mediaSyncAvailable"] = False
+                # Transient errors are common here: battery cameras are
+                # usually asleep when HA starts, so the first scan attempt
+                # can time out. Retry on the next update cycle instead of
+                # disabling media sync permanently; only give up after
+                # repeated failures (genuinely missing SD card).
+                device["initialMediaScanRunning"] = False
+                attempts = device.get("initialMediaScanAttempts", 0) + 1
+                device["initialMediaScanAttempts"] = attempts
                 enableMediaSync = device[ENABLE_MEDIA_SYNC]
-                errMsg = "Disabling media sync as there was error returned from getRecordingsList. Do you have SD card inserted?"
-                if enableMediaSync:
-                    LOGGER.warning(errMsg)
-                    LOGGER.warning(device["name"] + ": " + str(err))
+                if attempts >= MEDIA_SYNC_INITIAL_SCAN_MAX_ATTEMPTS:
+                    device["initialMediaScanDone"] = True
+                    device["mediaSyncAvailable"] = False
+                    errMsg = (
+                        "Disabling media sync as getRecordingsList failed "
+                        + str(attempts)
+                        + " times. Do you have SD card inserted?"
+                    )
+                    if enableMediaSync:
+                        LOGGER.warning(errMsg)
+                        LOGGER.warning(device["name"] + ": " + str(err))
+                    else:
+                        LOGGER.info(errMsg)
+                        LOGGER.info(device["name"] + ": " + str(err))
                 else:
-                    LOGGER.info(errMsg)
-                    LOGGER.info(device["name"] + ": " + str(err))
+                    LOGGER.info(
+                        "Initial media scan failed for "
+                        + device["name"]
+                        + " (attempt "
+                        + str(attempts)
+                        + "), will retry on next update cycle: "
+                        + str(err)
+                    )
 
 
 async def check_functionality(entry, hass, cls, check_function):
