@@ -2283,8 +2283,26 @@ async def scheduleAll(hass, device, entry, mediaSync):
                 await hass.async_add_executor_job(
                     device["controller"].getRecordingsList
                 )
+
+                # findMedia gates the whole media sync pipeline: the
+                # recurring sync timer is only scheduled once it finishes.
+                # A camera falling asleep mid-scan used to hang it forever,
+                # so bound it and retry on the next update cycle.
+                async def _guardedFindMedia(device=device, entry=entry):
+                    try:
+                        async with asyncio.timeout(MEDIA_SYNC_RUN_TIMEOUT):
+                            await findMedia(hass, device, entry)
+                    except TimeoutError:
+                        LOGGER.warning(
+                            "Initial media scan for "
+                            + device["name"]
+                            + " timed out (camera may have gone to sleep)."
+                            + " Will retry on next update cycle."
+                        )
+                        device["initialMediaScanRunning"] = False
+
                 hass.async_create_background_task(
-                    findMedia(hass, device, entry),
+                    _guardedFindMedia(),
                     "findMedia",
                 )
                 device["initialMediaScanAttempts"] = 0
