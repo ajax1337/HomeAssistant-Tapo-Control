@@ -360,11 +360,13 @@ class TapoEnableMediaSyncSwitch(TapoSwitchEntity):
         await self._entry_storage.async_save({ENABLE_MEDIA_SYNC: True})
         self._entry[ENABLE_MEDIA_SYNC] = True
         self._attr_state = "on"
+        self.async_write_ha_state()
 
     async def async_turn_off(self) -> None:
         await self._entry_storage.async_save({ENABLE_MEDIA_SYNC: False})
         self._entry[ENABLE_MEDIA_SYNC] = False
         self._attr_state = "off"
+        self.async_write_ha_state()
 
     def updateTapo(self, camData):
         mediaSyncHours = self._config_entry.data.get(MEDIA_SYNC_HOURS)
