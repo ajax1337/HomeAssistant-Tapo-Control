@@ -4,6 +4,14 @@
 
 # HomeAssistant - Tapo: Cameras Control
 
+> **Fork notice (ajax1337):** this fork is identical to
+> [upstream](https://github.com/JurajNyiri/HomeAssistant-Tapo-Control) except it
+> depends on [ajax1337/pytapo](https://github.com/ajax1337/pytapo)
+> (v3.4.15.post1), which fixes verified bugs in the pytapo library: a broken
+> KLAP transport method, a TS-parser crash, file-descriptor leaks in the
+> streamer/downloader, shell-injection-prone ffmpeg invocation, missing ffmpeg
+> error handling, mutable default arguments, and debug prints polluting stdout.
+
 Custom component - Tapo: Cameras Control - to add Tapo cameras, doorbells and chimes into Home Assistant
 
 ⭐ Now also exposing a stream for devices that have no RTSP or ONVIF capabilities.
