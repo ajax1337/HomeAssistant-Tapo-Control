@@ -1209,7 +1209,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
             LOGGER.debug("mediaSync - 2")
 
             if mediaSyncHours == "":
-                mediaSyncTime = False
+                if device.get("isRunningOnBattery"):
+                    # Unbounded sync would download the entire SD card
+                    # history; cap battery/solar cameras at 24 hours when
+                    # no limit is configured.
+                    mediaSyncTime = (24 * 60 * 60) + timeCorrection
+                else:
+                    mediaSyncTime = False
             else:
                 mediaSyncTime = (int(mediaSyncHours) * 60 * 60) + timeCorrection
             LOGGER.debug("mediaSync - 3")

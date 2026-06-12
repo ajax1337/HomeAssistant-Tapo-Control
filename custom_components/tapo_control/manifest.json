@@ -7,7 +7,7 @@
     "@JurajNyiri",
     "@ajax1337"
   ],
-  "version": "7.1.16.4",
+  "version": "7.1.16.5",
   "iot_class": "local_polling",
   "requirements": [
     "pytapo @ https://github.com/ajax1337/pytapo/archive/refs/tags/v3.4.15.post1.tar.gz",
