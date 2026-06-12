@@ -240,7 +240,7 @@ class FlowHandler(ConfigFlow):
                         CONF_USERNAME, description={"suggested_value": username}
                     ): str,
                     vol.Required(
-                        CONF_PASSWORD, description={"suggested_value": password}
+                        CONF_PASSWORD
                     ): str,
                 }
             ),
@@ -322,7 +322,7 @@ class FlowHandler(ConfigFlow):
             data_schema=vol.Schema(
                 {
                     vol.Required(
-                        CLOUD_PASSWORD, description={"suggested_value": cloudPassword}
+                        CLOUD_PASSWORD
                     ): str,
                 }
             ),
@@ -459,11 +459,11 @@ class FlowHandler(ConfigFlow):
             if SOUND_DETECTION_DURATION in user_input:
                 sound_detection_duration = user_input[SOUND_DETECTION_DURATION]
             else:
-                sound_detection_duration = -30
+                sound_detection_duration = 1
             if SOUND_DETECTION_RESET in user_input:
                 sound_detection_reset = user_input[SOUND_DETECTION_RESET]
             else:
-                sound_detection_reset = -30
+                sound_detection_reset = 10
             if CONF_EXTRA_ARGUMENTS in user_input:
                 extra_arguments = user_input[CONF_EXTRA_ARGUMENTS]
             else:
@@ -708,7 +708,7 @@ class FlowHandler(ConfigFlow):
             data_schema = vol.Schema(
                 {
                     vol.Required(
-                        CLOUD_PASSWORD, description={"suggested_value": cloud_password}
+                        CLOUD_PASSWORD
                     ): str,
                 }
             )
@@ -719,7 +719,7 @@ class FlowHandler(ConfigFlow):
                         CONF_USERNAME, description={"suggested_value": cloud_username}
                     ): str,
                     vol.Required(
-                        CLOUD_PASSWORD, description={"suggested_value": cloud_password}
+                        CLOUD_PASSWORD
                     ): str,
                 }
             )
@@ -845,7 +845,7 @@ class FlowHandler(ConfigFlow):
                         CONF_EMAIL, description={"suggested_value": email}
                     ): str,
                     vol.Required(
-                        CONF_PASSWORD, description={"suggested_value": password}
+                        CONF_PASSWORD
                     ): str,
                 }
             ),
@@ -1039,7 +1039,7 @@ class FlowHandler(ConfigFlow):
             data_schema = vol.Schema(
                 {
                     vol.Optional(
-                        CLOUD_PASSWORD, description={"suggested_value": cloud_password}
+                        CLOUD_PASSWORD
                     ): str,
                 }
             )
@@ -1050,7 +1050,7 @@ class FlowHandler(ConfigFlow):
                         CONF_USERNAME, description={"suggested_value": cloud_username}
                     ): str,
                     vol.Optional(
-                        CLOUD_PASSWORD, description={"suggested_value": cloud_password}
+                        CLOUD_PASSWORD
                     ): str,
                 }
             )
@@ -1206,7 +1206,7 @@ class FlowHandler(ConfigFlow):
                         CONF_USERNAME, description={"suggested_value": username}
                     ): str,
                     vol.Optional(
-                        CONF_PASSWORD, description={"suggested_value": password}
+                        CONF_PASSWORD
                     ): str,
                     vol.Required(
                         CONF_SKIP_RTSP, description={"suggested_value": skip_rtsp}
@@ -1946,10 +1946,10 @@ class TapoOptionsFlowHandler(OptionsFlow):
                         CONF_USERNAME, description={"suggested_value": username}
                     ): str,
                     vol.Optional(
-                        CONF_PASSWORD, description={"suggested_value": password}
+                        CONF_PASSWORD
                     ): str,
                     vol.Optional(
-                        CLOUD_PASSWORD, description={"suggested_value": cloud_password}
+                        CLOUD_PASSWORD
                     ): str,
                     vol.Optional(
                         ENABLE_MOTION_SENSOR,

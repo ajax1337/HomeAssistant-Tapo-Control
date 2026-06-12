@@ -273,7 +273,7 @@ async def getRecordings(hass, entryData, tapoController, date):
     return recordingsForDay
 
 
-def getEntryStorageFile(config_entry, child_id):
+def getEntryStorageFile(config_entry, child_id=""):
     return f"tapo_control_{config_entry.entry_id}{child_id}"
 
 
@@ -545,17 +545,19 @@ async def deleteDir(hass, dirPath):
         await hass.async_add_executor_job(shutil.rmtree, dirPath)
 
 
-async def deleteFilesOlderThan(hass: HomeAssistant, dirPath, deleteOlderThan):
+def _deleteFilesOlderThan(dirPath, deleteOlderThan):
     now = datetime.datetime.utcnow().timestamp()
     if os.path.exists(dirPath):
-
-        listDirFiles = await hass.async_add_executor_job(os.listdir, dirPath)
-        for f in listDirFiles:
+        for f in os.listdir(dirPath):
             filePath = os.path.join(dirPath, f)
             last_modified = os.stat(filePath).st_mtime
             if now - last_modified > deleteOlderThan:
                 LOGGER.debug("[deleteFilesOlderThan] Removing " + filePath + "...")
                 os.remove(filePath)
+
+
+async def deleteFilesOlderThan(hass: HomeAssistant, dirPath, deleteOlderThan):
+    await hass.async_add_executor_job(_deleteFilesOlderThan, dirPath, deleteOlderThan)
 
 
 async def deleteFilesNotIncluding(hass: HomeAssistant, dirPath, includingString):
